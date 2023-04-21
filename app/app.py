@@ -12,7 +12,7 @@ def create_app(admin: bool = True):
 	app = AppFastApi()
 	middlewares_factory(app, middlewares)
 	routers_factory(app, routers)
-	# if admin:
-	# 	from .adm import create_adm_app
-	# 	app.mount('/admin', create_adm_app())
+	if admin:
+		from .admin import create_admin_app
+		app.mount('/admin', create_admin_app())
 	return app

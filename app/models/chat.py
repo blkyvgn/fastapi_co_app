@@ -15,15 +15,16 @@ from sqlalchemy import (
 	String,
 	Text,
 	JSON,
+	Index,
+	UniqueConstraint,
 )
 
 
 class Room(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	__tablename__ = 'rooms'
 
-	alias = Column(
-		String(30), 
-		unique=True,
+	slug = Column(
+		String(30),
 	)
 	messages = relationship(
 		'Message', 
@@ -44,6 +45,11 @@ class Room(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	company = relationship(
 		'Company', 
 		back_populates='chat_rooms'
+	)
+
+	__table_args__ = (
+		Index("idx_chat_slug_company", slug, company_id, unique=True),
+		UniqueConstraint(slug, company_id, name='chat_slug_company'),
 	)
 
 

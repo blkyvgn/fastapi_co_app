@@ -22,7 +22,8 @@ class Company(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 
 	alias = Column(
 		String(30), 
-		unique=True,
+		unique = True,
+		index=True,
 	)
 	name = Column(
 		JSON,

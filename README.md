@@ -1,6 +1,6 @@
 # fastapi_co_app
 
-$ mkdir -p app/log app/storage/{images,video,audio}
+$ mkdir -p log storage/{images,video,audio}
 
 # make database models
 $ alembic init alembic

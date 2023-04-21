@@ -1,4 +1,4 @@
-from app.vendors.dependencies import DB
+from app.vendors.dependencies import DB, Company
 from sqlalchemy.orm import exc
 from sqlalchemy import func
 from fastapi import (

@@ -15,12 +15,17 @@ from sqlalchemy import (
 	String,
 	Text,
 	JSON,
+	Index,
+	UniqueConstraint,
 )
 
 
 class Article(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	__tablename__ = 'articles'
 
+	slug = Column(
+		String(180),
+	)
 	category_id = Column(
 		Integer, 
 		ForeignKey('categories.id')
@@ -52,6 +57,11 @@ class Article(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	company = relationship(
 		'Company', 
 		back_populates='articles'
+	)
+
+	__table_args__ = (
+		Index("idx_article_slug_company", slug, company_id, unique=True),
+		UniqueConstraint(slug, company_id, name='article_slug_company'),
 	)
 
 

@@ -3,6 +3,8 @@ from decimal import Decimal
 from enum import Enum
 from pydantic import (
 	BaseModel, 
+	Field,
+	EmailStr,
 	ValidationError, 
 	validator,
 )
@@ -15,11 +17,18 @@ from app.vendors.helpers.validators import (
 	passwd_validation_check,
 )
 
+class SexEnum(str, Enum):
+	male = 'male'
+	female = 'female'
 
 class ProfileInBase(BaseModel):
-	first_name: str
-	last_name: str
-	female: bool
+	first_name: str = Field(..., 
+		title='First name', description='User first name',
+		min_length=4, max_length=80)
+	last_name: str = Field(..., 
+		title='Last name', description='User last name',
+		min_length=4, max_length=80)
+	sex: SexEnum = SexEnum.female
 
 class ProfileIn(ProfileInBase):
 	id: int 
@@ -31,11 +40,13 @@ class ProfileInCreate(ProfileInBase):
 
 
 class AccountBase(BaseModel):
-	email: str 
-	username: str
+	email: EmailStr
+	username: str = Field(..., 
+		title='user name (login)', description='User login',
+		min_length=3, max_length=30)
 	is_valid: bool = False
 	is_activated: bool = False
-	permissions: list[str] = []
+	permissions: list[str] | None = None
 
 	@validator('email')
 	def email_validation(cls, v):
@@ -69,8 +80,12 @@ class Account(AccountBase):
 
 
 class AccountCreate(AccountBase):
-	password: str
-	password_confirmation: str
+	password: str = Field(..., 
+		title='password', description='User password',
+		min_length=8, max_length=16)
+	password_confirmation: str = Field(..., 
+		title='confirm password', description='Confirm password',
+		min_length=8, max_length=16)
 
 	profile: ProfileInCreate
 

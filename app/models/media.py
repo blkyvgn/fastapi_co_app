@@ -13,6 +13,7 @@ from app.vendors.mixins.model import (
 	ValidMixin,
 	HelpersMixin,
 )
+import enum
 from sqlalchemy import (
 	Column, 
 	ForeignKey, 
@@ -20,19 +21,35 @@ from sqlalchemy import (
 	String,
 	Text,
 	JSON,
+	Enum,
+	Index,
+	UniqueConstraint,
 )
+
+class MediaTypeEnum(enum.Enum):
+    image = 'image'
+    video = 'video'
+    audio = 'audio'
 
 class Media(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	__tablename__ = 'medias'
 
-	name = Column(
+	slug = Column(
 		String(180),
 	)
-	short_desc = Column(
-		String(500),
+	name = Column(
+		JSON,
+		default = dict
 	)
+	short_desc = Column(
+		JSON,
+		default = dict
+	)
+	# file_type = Column(
+	# 	String(10)
+	# )
 	file_type = Column(
-		String(10)
+		Enum(MediaTypeEnum)
 	)
 	file = Column(
 		String(1000),
@@ -52,6 +69,10 @@ class Media(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	company = relationship(
 		'Company', 
 		back_populates='media'
+	)
+	__table_args__ = (
+		Index("idx_media_slug_company", slug, company_id, unique=True),
+		UniqueConstraint(slug, company_id, name='media_slug_company'),
 	)
 
 	@classmethod

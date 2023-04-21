@@ -50,13 +50,12 @@ def verify_token(token: str) -> sch.Account:
 			detail='Not activated user',
 			headers={'WWW-Authenticate': 'Bearer'},
 		)
-	if account.is_valid:
+	if not account.is_valid:
 		raise HTTPException(
 			status_code=status.HTTP_400_BAD_REQUEST, 
 			detail='Blocked user',
 			headers={'WWW-Authenticate': 'Bearer'},
 		)
-
 	return account
 
 

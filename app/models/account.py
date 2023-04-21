@@ -17,6 +17,7 @@ from app.vendors.mixins.model import (
 	ValidMixin,
 	HelpersMixin,
 )
+import enum
 from sqlalchemy import (
 	Column, 
 	ForeignKey, 
@@ -24,6 +25,7 @@ from sqlalchemy import (
 	String,
 	Boolean,
 	JSON,
+	Enum,
 )
 from app.config import cfg
 
@@ -32,12 +34,14 @@ class Account(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	__tablename__ = 'accounts'
 
 	username = Column(
-		String, 
-		unique=True
+		String(30), 
+		unique=True,
+		index=True,
 	)
 	email = Column(
-		String, 
-		unique=True
+		String(80), 
+		unique=True,
+		index=True,
 	)
 	password = Column(
 		String
@@ -48,6 +52,7 @@ class Account(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	)
 	permissions = Column(
 		JSON,
+		default=list,
 	)
 	articles = relationship(
 		'Article', 
@@ -66,7 +71,11 @@ class Account(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 		back_populates='account',
 		uselist=False
 	)
-	roles = relationship('Role', secondary='accounts_roles', back_populates='accounts')
+	roles = relationship(
+		'Role', 
+		secondary='accounts_roles', 
+		back_populates='accounts'
+	)
 
 	@staticmethod
 	def get_hashed_password(password: str) -> str:
@@ -98,8 +107,7 @@ class Account(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	def send_reset_passwd_mail(self, request):
 		try:
 			email_data = mail_helper.get_reset_passwd_account_mail(
-				request, 
-				self, 
+				request, self, 
 				'mail/reset_password.html'
 			)
 			send_email.apply_async(
@@ -109,13 +117,19 @@ class Account(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 		except:
 			print('------------------------------ mail -----------------------------')
 			print(mail_helper.get_reset_passwd_account_mail(
-				request, 
-				self, 
+				request, self, 
 				'mail/reset_password.html')
 			)
 			print('-----------------------------------------------------------------')
 
+	@classmethod
+	def get_permissions(cls):
+		return self.permissions
 
+
+class SexEnum(str, enum.Enum):
+    male = 'male'
+    female = 'female'
 
 class Profile(HelpersMixin, BaseModel):
 	__tablename__ = 'profiles'
@@ -129,9 +143,8 @@ class Profile(HelpersMixin, BaseModel):
 	photo = Column(
 		String(255)
 	)
-	female = Column(
-		Boolean,
-		default=True
+	sex = Column(
+		Enum(SexEnum)
 	)
 	account_id = Column(
 		Integer, 
@@ -143,16 +156,6 @@ class Profile(HelpersMixin, BaseModel):
 	)
 
 	full_name = column_property(first_name + ' ' + last_name)
-
-	# gen = synonym('female')
-
-	# @property
-	# def sex(self):
-	# 	return 'female' if self._sex else 'male'
-
-	# @sex.setter
-	# def sex(self, v):
-	# 	self._sex = v == 'female'
 
 	@staticmethod
 	def save_and_resize_photo(photo, ext_path: str, photo_width: int):

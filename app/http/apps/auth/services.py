@@ -31,12 +31,15 @@ def register_new_user(request: Request, db: DB, account_data: sch.AccountCreate)
 			detail='Username or email not unique',
 			headers={'WWW-Authenticate': 'Bearer'},
 		)
-
+	permissions = account_data.permissions
+	if not permissions:
+		permissions = mdl.Account.get_permissions()
 	account = mdl.Account(
 		email=account_data.email,
 		username=account_data.username,
 		is_valid=account_data.is_valid,
 		password=mdl.Account.get_hashed_password(account_data.password),
+		permissions=permissions,
 	)
 	db.session.add(account)
 	db.session.commit()
@@ -45,7 +48,7 @@ def register_new_user(request: Request, db: DB, account_data: sch.AccountCreate)
 	profile = mdl.Profile(
 		first_name=account_data.profile.first_name,
 		last_name=account_data.profile.first_name,
-		female=account_data.profile.female,
+		sex=account_data.profile.sex,
 		account_id=account.id,
 	)
 	db.session.add(profile)
@@ -71,7 +74,7 @@ def authenticate_user(db: DB, username: str, password: str) -> sch.Token:
 			detail='Not activated user',
 			headers={'WWW-Authenticate': 'Bearer'},
 		)
-	if account.is_valid:
+	if not account.is_valid:
 		raise HTTPException(
 			status_code=status.HTTP_400_BAD_REQUEST, 
 			detail='Blocked user',

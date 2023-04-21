@@ -5,12 +5,16 @@ from .category.api import category
 from .category.admin.api import category as admin_category
 from .account.api import account
 from .account.admin.api import account as admin_account
+from .article.api import article
+from .media.api import media
 
 routers = [
 	auth,
 	account,
 	company,
 	category,
+	article,
+	media,
 ]
 
 admin_routers = [

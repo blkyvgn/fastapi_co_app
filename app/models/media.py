@@ -45,9 +45,6 @@ class Media(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 		JSON,
 		default = dict
 	)
-	# file_type = Column(
-	# 	String(10)
-	# )
 	file_type = Column(
 		Enum(MediaTypeEnum)
 	)

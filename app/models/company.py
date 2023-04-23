@@ -7,6 +7,7 @@ from app.vendors.mixins.model import (
 	TimestampsMixin, 
 	ValidMixin,
 	HelpersMixin,
+	ImgUploadMixin,
 )
 from sqlalchemy import (
 	Column, 
@@ -17,13 +18,16 @@ from sqlalchemy import (
 )
 
 
-class Company(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
+class Company(ValidMixin, TimestampsMixin, HelpersMixin, ImgUploadMixin, BaseModel):
 	__tablename__ = 'companies'
 
 	alias = Column(
 		String(30), 
 		unique = True,
 		index=True,
+	)
+	logo = Column(
+		String(300)
 	)
 	name = Column(
 		JSON,
@@ -53,3 +57,10 @@ class Company(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 		'Role', 
 		back_populates='company'
 	)
+
+	def upload_file(img_name, file: None, bg_task, img_width: int | None = None):
+		img_field = getattr(self, image_name)
+		if img_field and file:
+			ext_img_path = f'images/company/{self.id}/logo'
+			bg_task.add_task(self.save_and_resize_img, file, ext_img_path, img_width)
+			self.img_field=f'{ext_img_path}/{file.filename}'

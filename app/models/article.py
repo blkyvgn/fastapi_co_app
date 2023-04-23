@@ -7,6 +7,7 @@ from app.vendors.mixins.model import (
 	TimestampsMixin, 
 	ValidMixin,
 	HelpersMixin,
+	ImgUploadMixin,
 )
 from sqlalchemy import (
 	Column, 
@@ -20,11 +21,14 @@ from sqlalchemy import (
 )
 
 
-class Article(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
+class Article(ValidMixin, TimestampsMixin, HelpersMixin, ImgUploadMixin, BaseModel):
 	__tablename__ = 'articles'
 
 	slug = Column(
 		String(180),
+	)
+	thumb = Column(
+		String(300)
 	)
 	category_id = Column(
 		Integer, 
@@ -63,6 +67,20 @@ class Article(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 		Index("idx_article_slug_company", slug, company_id, unique=True),
 		UniqueConstraint(slug, company_id, name='article_slug_company'),
 	)
+
+	def upload_file(self, image_name, file: None, img_width: int | None = None):
+		if hasattr(self, image_name) and file:
+			ext_img_path = f'images/{self.__class__.__name__.lower()}/{self.id}/{image_name}'
+			img_path = self.save_and_resize_img(file, ext_img_path, img_width)
+			setattr(self, image_name, img_path)
+		return img_path
+
+	async def async_upload_file(self, image_name, file: None, img_width: int | None = None):
+		img_path = None
+		if hasattr(self, image_name) and file:
+			ext_img_path = f'images/{self.__class__.__name__.lower()}/{self.id}/{image_name}'
+			img_path = self.save_and_resize_img(file, ext_img_path, 60)
+		return img_path
 
 
 

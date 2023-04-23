@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm.exc import NoResultFound
 from fastapi_cache.decorator import cache
 from collections import namedtuple
@@ -14,7 +14,7 @@ async def get_company(db: DB): # alias: str = cfg.company_alias
 	try:
 		alias = cfg.company_alias
 		company = db.session.execute(
-			db.select(mdl.Company.id, mdl.Company.alias).filter_by(alias='grkr', is_valid=True)
+			db.select(mdl.Company.id, mdl.Company.alias).filter_by(alias=alias, is_valid=True)
 		).one()
 	except NoResultFound:
 		raise HTTPException(

@@ -22,6 +22,13 @@ class Config(BaseConfig):
     company_alias = 'grkr'
 
     photo_width: int = 80
+
+    image_width: dict = {
+        'THUMBNAIL': 60,
+        'SHOWCASE': 120,
+        'SLIDER': 500,
+        'LOGO': 180,
+    }
     allowed_file_extensions: dict = {
         'image': ['jpg', 'jpeg', 'png',],
         'video': ['mp4',],

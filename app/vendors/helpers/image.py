@@ -35,3 +35,12 @@ def resize_image(img_path, width: int):
 				return
 			res_img = image.resize(new_size, Image.ANTIALIAS)
 			res_img.save(img_path)
+
+# def async_resize_image(img_path, width: int):
+# 	if img_path:
+# 		with Image.open(img_path) as image:
+# 			new_size = get_new_image_dimensions(image.size, width)
+# 			if new_size == image.size:
+# 				return
+# 			res_img = image.resize(new_size, Image.ANTIALIAS)
+# 			res_img.save(img_path)

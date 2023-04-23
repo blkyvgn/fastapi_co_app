@@ -7,6 +7,10 @@ from fastapi import (
     HTTPException,
     status, 
     Path,
+    File, 
+    UploadFile,
+    BackgroundTasks,
+    Form,
 )
 from typing import Annotated
 from . import policy as pls
@@ -75,3 +79,15 @@ async def delete_category(
 ):
     srv.delete_category(db, company, category_id=pk)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@category.post('/{pk}/upload-thumb/',
+    status_code=status.HTTP_200_OK
+)
+async def upload_thumb(
+    company: Company, db: DB,
+    pk: Annotated[int, Path(title="The ID company", gt=0)], 
+    file: UploadFile, 
+    width: int
+):
+    return await srv.async_upload_thumb(db, company, pk, file, width)

@@ -4,6 +4,7 @@ from fastapi import (
 	HTTPException,
 	status,
 )
+from enum import Enum
 from sqlalchemy import desc
 from app import models as mdl
 from . import schemas as sch
@@ -88,3 +89,28 @@ def delete_category(db: DB, company: Company, category_id: int):
 		) from None
 	db.session.delete(category)
 	db.session.commit()
+
+
+class FileWidth(int, Enum):
+	thumbnail = cfg.image_width['THUMBNAIL']
+	showcase  = cfg.image_width['SHOWCASE']
+	slider    = cfg.image_width['SLIDER']
+	logo      = cfg.image_width['LOGO']
+
+async def async_upload_thumb(db: DB, company: Company, pk: int, file: None, width: int):
+	category = mdl.Category.get_first_item_by_filter(db, id=pk, is_valid=True)
+	if category is None:
+		raise HTTPException(
+			status_code=status.HTTP_404_NOT_FOUND, 
+			detail='Category not found'
+		) from None
+	try:
+		ext_img_path = f'images/category/{pk}/thumb'
+		img_path = category.save_and_resize_img(file, ext_img_path, width)
+		file_path = None
+		category.thumb = img_path
+		db.session.add(category)
+		db.session.commit()
+		return {'success': f'File uploaded (Category:{pk})'}
+	except:
+		return {'error':'error'}

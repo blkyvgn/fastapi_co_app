@@ -2,6 +2,9 @@ from app.vendors.dependencies import DB, Company
 from starlette.responses import StreamingResponse
 from app.vendors.base.router import AppRouter
 from starlette.requests import Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi import (
 	Depends, 
 	APIRouter, 
@@ -13,6 +16,7 @@ from fastapi import (
 from typing import Annotated
 from . import services as srv
 from . import schemas as sch
+from .utils import open_file
 from app.config import cfg
 
 media = APIRouter(
@@ -44,12 +48,20 @@ async def read_media(
 	return srv.get_media(db, company, media_id=pk)
 
 
+
+templates = Jinja2Templates(directory='app/resources/test')
+
+@media.get("/test/video/{id}", response_class=HTMLResponse)
+async def test_video(request: Request, id: str):
+	return templates.TemplateResponse('test_video.html', {'request': request, 'id': id})
+
+
 @media.get('/video/{pk}/stream/')
 async def get_streaming_video(
 	company: Company, db: DB, request: Request, 
 	pk: Annotated[int, Path(title="The ID media", gt=0)]
 ) -> StreamingResponse:
-	file, status_code, content_length, headers = await srv.open_file(request, db, video_id)
+	file, status_code, content_length, headers = await open_file(request, db, pk)
 	response = StreamingResponse(
 		file,
 		media_type='video/mp4',

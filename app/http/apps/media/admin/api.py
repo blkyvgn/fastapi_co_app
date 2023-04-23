@@ -1,5 +1,5 @@
 from app.vendors.dependencies import DB, Company
-from app.vendors.base.router import AppRouter
+from app.http.apps.auth import CurrentUser
 from fastapi import (
 	Depends, 
 	APIRouter, 
@@ -9,19 +9,28 @@ from fastapi import (
 	Path,
 	File, 
 	UploadFile,
+	BackgroundTasks,
+	Form,
 )
 from typing import Annotated
+from . import policy as pls
 from . import services as srv
 from . import schemas as sch
 from app.config import cfg
 
+
 media = APIRouter(
-	route_class=AppRouter, 
 	prefix = '/media',
 	tags = ['media'], 
 )
 
 
-@app.post("/uploadfiles/")
-async def create_upload_files(files: list[UploadFile]):
-	return {"filenames": [file.filename for file in files]}
+@media.post('/{pk}/upload-video/',
+	status_code=status.HTTP_200_OK
+)
+async def upload_video(
+	company: Company, db: DB,
+	pk: Annotated[int, Path(title="The ID media", gt=0)], 
+	file: UploadFile
+):
+	return await srv.async_upload_video(db, company, pk, file)

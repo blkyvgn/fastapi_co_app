@@ -30,8 +30,11 @@ async def async_write_file(file: UploadFile, path: Path, chunk_size=cfg.chunk_si
 
 def write_file(file: UploadFile, path: Path, chunk_size=cfg.chunk_size):
 	file_path = path / file.filename
+	print(file_path)
 	with open(file_path, 'wb') as _fb:
+		print('--- write file ---')
 		shutil.copyfileobj(file.file, _fb, chunk_size)
+	print(file_path)
 	return file_path
 
 

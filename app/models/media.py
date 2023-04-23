@@ -4,6 +4,7 @@ from app.vendors.helpers.file import (
 	write_file, 
 	get_or_create_storage_dir,
 )
+from app.config import cfg
 from sqlalchemy.orm import (
 	relationship,
 	backref,
@@ -27,9 +28,9 @@ from sqlalchemy import (
 )
 
 class MediaTypeEnum(enum.Enum):
-    image = 'image'
-    video = 'video'
-    audio = 'audio'
+	image = 'image'
+	video = 'video'
+	audio = 'audio'
 
 class Media(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 	__tablename__ = 'medias'
@@ -100,3 +101,15 @@ class Media(ValidMixin, TimestampsMixin, HelpersMixin, BaseModel):
 
 		return photo_file_subpath
 
+	def save_video(self, file, ext_path):
+		if not file:
+			return None
+		# try:
+		storage_path = cfg.root_path / cfg.upload_folder_dir
+		dir_path = get_or_create_storage_dir(storage_path, ext_path)
+		img_file_path = write_file(file, dir_path)
+		img_file_path = f'{ext_path}/{file.filename}'
+		# except:
+		# 	img_file_path = None
+
+		return img_file_path

@@ -8,6 +8,8 @@ from .account.admin.api import account as admin_account
 from .article.api import article
 from .article.admin.api import article as admin_article
 from .media.api import media
+from .media.admin.api import media as admin_media
+from .chat.api import chat
 
 routers = [
 	auth,
@@ -16,6 +18,7 @@ routers = [
 	category,
 	article,
 	media,
+	chat,
 ]
 
 admin_routers = [
@@ -23,4 +26,5 @@ admin_routers = [
 	admin_category,
 	admin_article,
 	admin_account,
+	admin_media,
 ]

@@ -1,5 +1,8 @@
 from app.vendors.dependencies import DB, Company
 from app.vendors.helpers.video import write_video
+# from app.vendors.helpers.file import (
+# 	get_or_create_storage_dir,
+# )
 from starlette.requests import Request
 from typing import IO, Generator
 from pathlib import Path
@@ -11,6 +14,7 @@ from fastapi import (
 	HTTPException, 
 )
 import shutil
+from app import models as mdl
 from app.config import cfg
 
 
@@ -38,11 +42,14 @@ def ranged(
 
 
 async def open_file(request: Request, db: DB, video_pk: int) -> tuple:
-	file = await mdl.Media.get(db, id=video_pk)
+	media = await mdl.Media.get(db, id=video_pk)
+	file = media.file
 	if file is None:
 		raise HTTPException(status_code=404, detail="Not found")
 	# path = Path(file.dict().get('file'))
-	path = Path(file.file)
+	# path = Path(file.file)
+	path = cfg.root_path / cfg.upload_folder_dir / file
+	# path = Path(file)
 	file = path.open('rb')
 	file_size = path.stat().st_size
 
